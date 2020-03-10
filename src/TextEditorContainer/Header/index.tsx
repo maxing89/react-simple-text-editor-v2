@@ -1,31 +1,48 @@
 import React, { Fragment } from 'react';
-import * as styles from './styles.jsx';
+import * as styles from './styles';
 import { Switch, Icon, Divider, Input, Row, Col, Spin } from 'antd';
-import PropTypes from 'prop-types';
 import { removePunctuation } from '../../helpers'
+import { Word, Format, Synonym } from '../../types'
+import { SwitchChangeEventHandler } from 'antd/lib/switch';
 
-const Header = (props) => {
+interface HeaderProps {
+  onChangeFormat: (checked: string | boolean | undefined, format: string) => void
+  selectedWord: Word | null
+  format: Format
+  loadingSynonyms: boolean
+  synonyms: Synonym[]
+  onSelectSynonym: (synonym: Synonym) => void
+}
 
-  const onChangeUnderline = (checked, event) => {
-    props.onChangeFormat(checked, 'underline');
+const Header: React.FC<HeaderProps> = ({
+  onChangeFormat,
+  selectedWord,
+  format,
+  loadingSynonyms,
+  synonyms,
+  onSelectSynonym
+}) => {
+
+  const onChangeUnderline: SwitchChangeEventHandler = (checked: boolean, _event: MouseEvent) => {
+    onChangeFormat(checked, 'underline');
   }
 
-  const onChangeItalic = (checked, event) => {
-    props.onChangeFormat(checked, 'italic');
+  const onChangeItalic: SwitchChangeEventHandler = (checked: boolean, _event: MouseEvent) => {
+    onChangeFormat(checked, 'italic');
   }
 
-  const onChangeBold = (checked, event) => {
-    props.onChangeFormat(checked, 'bold');
+  const onChangeBold: SwitchChangeEventHandler = (checked: boolean, _event: MouseEvent) => {
+    onChangeFormat(checked, 'bold');
   }
 
-  const onChangeColor = (event) => {
-    props.onChangeFormat(event.target.value, 'color');
+  const onChangeColor = (e: { target: { value: string | undefined } }) => {
+    onChangeFormat(e.target.value, 'color');
   }
 
-  let wordWithNoPunctuation = null;
+  let wordWithNoPunctuation
 
-  if (props.selectedWord) {
-    [wordWithNoPunctuation] = removePunctuation(props.selectedWord.word.value)
+  if (selectedWord) {
+    [wordWithNoPunctuation] = removePunctuation(selectedWord.value)
   }
 
   return (
@@ -40,7 +57,7 @@ const Header = (props) => {
                 checkedChildren={<Icon type="check" />}
                 unCheckedChildren={<Icon type="close" />}
                 onChange={onChangeBold}
-                checked={props.format.bold}
+                checked={format.bold}
               />
             </styles.ToogleCol>
             <styles.ToogleCol sm={2}>
@@ -49,7 +66,7 @@ const Header = (props) => {
                 checkedChildren={<Icon type="check" />}
                 unCheckedChildren={<Icon type="close" />}
                 onChange={onChangeItalic}
-                checked={props.format.italic}
+                checked={format.italic}
               />
             </styles.ToogleCol>
             <styles.ToogleCol sm={3}>
@@ -58,7 +75,7 @@ const Header = (props) => {
                 checkedChildren={<Icon type="check" />}
                 unCheckedChildren={<Icon type="close" />}
                 onChange={onChangeUnderline}
-                checked={props.format.underline}
+                checked={format.underline}
               />
               <Divider type="vertical" />
             </styles.ToogleCol>
@@ -66,21 +83,21 @@ const Header = (props) => {
               <Input 
                 placeholder="#212121"
                 onChange={onChangeColor}
-                value={props.format.color}
+                value={format.color}
               />
             </Col>
             <styles.SynonymsCol sm={14}>
               <styles.SynonymContainer>
-                {props.loadingSynonyms ? (
+                {loadingSynonyms ? (
                   <Spin />
                 ) : (
-                  props.synonyms.length > 0 ? (
-                      props.synonyms.map((synonym) => {
-                        return <styles.Synonym key={synonym.word} onClick={props.onSelectSynonym.bind(this, synonym)}>{synonym.word}</styles.Synonym>
+                  synonyms.length > 0 ? (
+                      synonyms.map((synonym) => {
+                        return <styles.Synonym key={synonym.word} onClick={() => onSelectSynonym(synonym)}>{synonym.word}</styles.Synonym>
                       })
                   ) : (
-                    props.selectedWord ? 
-                      <styles.NoSynonymsMessage>{`No synonyms available for ${wordWithNoPunctuation[0]}`}</styles.NoSynonymsMessage>
+                    selectedWord ? 
+                      <styles.NoSynonymsMessage>{`No synonyms available for ${wordWithNoPunctuation && wordWithNoPunctuation[0]}`}</styles.NoSynonymsMessage>
                     : null
                   )
                 )}
@@ -91,24 +108,6 @@ const Header = (props) => {
       }
     />
   );
-}
-
-Header.propTypes = {
-  format: PropTypes.shape({
-    bold: PropTypes.bool,
-    underline: PropTypes.bool,
-    italic: PropTypes.bool,
-    color: PropTypes.string,
-  }),
-};
-
-Header.defaultProps = {
-  format: {
-    bold: false,
-    underline: false,
-    italic: false,
-    color: '#000000',
-  }
 }
 
 export default Header;

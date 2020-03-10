@@ -11,24 +11,25 @@ import {
 } from '../helpers';
 import dataMuseAPI from '../api/api';
 import { AppWrapper } from './styles'
+import { Word, Synonym, Format } from '../types';
  
-const TextEditorContainer = (props) => {
-  const defaultFormat = {
+const TextEditorContainer: React.FC = () => {
+  const defaultFormat: Format = {
     bold: false,
     italic: false,
     underline: false,
     color: '#000000',
   };
 
-  const [inputText, setInputText] = useState(null);
-  const [selectedWord, setSelectedWord] = useState(null);
-  const [synonyms, setSynonyms] = useState([]);
-  const [loadingSynonyms, setLoadingSynonyms] = useState(false);
+  const [inputText, setInputText] = useState<Word[] | null>([]);
+  const [selectedWord, setSelectedWord] = useState<Word | null>(null);
+  const [synonyms, setSynonyms] = useState<Synonym[]>([]);
+  const [loadingSynonyms, setLoadingSynonyms] = useState<boolean>(false);
 
-  const getSynonyms = (selectedWord) => {
+  const getSynonyms = (selectedWord: Word) => {
     setLoadingSynonyms(true);
 
-    dataMuseAPI.fetchWordSynonyms(selectedWord.word.value)
+    dataMuseAPI.fetchWordSynonyms(selectedWord.value)
       .then((synonyms) => {
         setSynonyms(synonyms);
         setLoadingSynonyms(false);
@@ -40,9 +41,9 @@ const TextEditorContainer = (props) => {
       });
   }
 
-  const handleOnChangeFormat = (checked, format) => {
+  const handleOnChangeFormat = (checked: boolean, format: string) => {
     if (selectedWord) {
-      const modifiedText = changeWordFormat(inputText, selectedWord, checked, format);
+      const modifiedText = changeWordFormat(inputText ? inputText : [], selectedWord, checked, format);
       const modifiedSelectedWord = changeSelectedWordFormat(selectedWord, checked, format);
       setInputText(modifiedText);
       setSelectedWord(modifiedSelectedWord);
@@ -51,7 +52,7 @@ const TextEditorContainer = (props) => {
     }
   }
 
-  const handleSubmit = (text) => {
+  const handleSubmit = (text: string) => {
     const arrayOfWords = convertTextIntoArray(text);
     setInputText(arrayOfWords);
   }
@@ -62,7 +63,7 @@ const TextEditorContainer = (props) => {
     setSynonyms([]);
   }
 
-  const handleOnSelection = (selectedWord) => {
+  const handleOnSelection = (selectedWord: Word) => {
     setSelectedWord(selectedWord);
     getSynonyms(selectedWord);
   }
@@ -71,9 +72,9 @@ const TextEditorContainer = (props) => {
     setSelectedWord(null);
   }
 
-  const handleSelectSynonym = (synonym) => {
-    const modifiedText = replaceWordWithSynonym(inputText, selectedWord, synonym);
-    const modifiedSelectedWord = changeSelectedWordValue(selectedWord, synonym);
+  const handleSelectSynonym = (synonym: Synonym) => {
+    const modifiedText = replaceWordWithSynonym(inputText ? inputText : [], selectedWord as Word, synonym);
+    const modifiedSelectedWord = changeSelectedWordValue(selectedWord as Word, synonym);
     setInputText(modifiedText);
     setSelectedWord(modifiedSelectedWord);
   }
@@ -82,7 +83,7 @@ const TextEditorContainer = (props) => {
     <AppWrapper>
       <Header 
         onChangeFormat={handleOnChangeFormat}
-        format={selectedWord ? selectedWord.word.format : defaultFormat}
+        format={selectedWord ? selectedWord.format : defaultFormat}
         loadingSynonyms={loadingSynonyms}
         synonyms={synonyms}
         selectedWord={selectedWord}

@@ -1,26 +1,29 @@
 import React, { useState, Fragment } from 'react';
-import * as styles from './styles.jsx';
+import * as styles from './styles';
 import { Row, Col, Button } from 'antd';
-import PropTypes from 'prop-types';
 
-const TextInputArea = (props) => {
-  const [input, setInput] = useState(null);
-  const [submitted, setSubmitted] = useState(false)
+interface TextInputAreaProps {
+  onSubmit: (text: string | undefined) => void
+  onReset: () => void
+}
 
-  const handleOnChange = (e) => {
-    e.persist();
+const TextInputArea: React.FC<TextInputAreaProps> = ({ onSubmit, onReset }) => {
+  const [input, setInput] = useState<string>();
+  const [submitted, setSubmitted] = useState<boolean>(false)
+
+  const handleOnChange = (e: { target: { value: string | undefined } }) => {
     setInput(e.target.value);
   }
 
   const handleOnClick = () => {
     setSubmitted(true);
-    props.onSubmit(input);
+    onSubmit(input);
   }
 
   const handleOnReset = () => {
-    setInput(null);
+    setInput(undefined);
     setSubmitted(false);
-    props.onReset();
+    onReset();
   }
 
   return (
@@ -45,16 +48,6 @@ const TextInputArea = (props) => {
     </Fragment>
   )
 }
-
-TextInputArea.propTypes = {
-  onSubmit: PropTypes.func,
-  onReset: PropTypes.func,
-};
-  
-TextInputArea.defaultProps = {
-  onSubmit: () => {},
-  onReset: () => {},
-};
 
 export default TextInputArea;
 
